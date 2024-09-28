@@ -62,11 +62,11 @@ class GameObject:
         """Абстрактный метод, который будет переопределен в подклассах."""
         raise NotImplementedError
 
-    def draw_cell(self, position, body_color):
+    def draw_cell(self, position, body_color, border_color=BORDER_COLOR):
         """Отрисовывает ячейка на экран."""
         rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, body_color, rect)
-        pg.draw.rect(screen, BORDER_COLOR, rect, 1)
+        pg.draw.rect(screen, border_color, rect, 1)
 
 
 class Apple(GameObject):
@@ -132,9 +132,9 @@ class Snake(GameObject):
 
     def draw(self):
         """Метод рисующий змейку на экране"""
-# Без цикла длина змеи на экране не увеличивается
-        for position in self.positions[:-1]:
-            self.draw_cell(position, self.body_color)
+        self.draw_cell(self.positions[len(self.positions) - 1],
+                       BOARD_BACKGROUND_COLOR,
+                       border_color=BOARD_BACKGROUND_COLOR)
         head_position = self.get_head_position()
         self.draw_cell(head_position, self.body_color)
 
@@ -144,6 +144,7 @@ class Snake(GameObject):
 
     def reset(self):
         """Метод возвращающий змейку в начальное состояние"""
+        screen.fill(BOARD_BACKGROUND_COLOR)
         self.length = 1
         self.positions = [BASIC_POSITION]
         self.direction = RIGHT
@@ -187,7 +188,6 @@ def main():
             if snake.get_head_position() == apple.position:
                 snake.length += 1
                 apple.randomize_position(snake.positions)
-        screen.fill(BOARD_BACKGROUND_COLOR)
         snake.draw()
         apple.draw()
 
