@@ -1,7 +1,8 @@
 from random import randint
 
-import pygame as pg
 import sys
+
+import pygame as pg
 
 # Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
@@ -15,11 +16,11 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-# Цвет фона
-BOARD_BACKGROUND_COLOR = (0, 0, 0)
-
 # Черный цвет
 BLACK_COLOR = (0, 0, 0)
+
+# Цвет фона
+BOARD_BACKGROUND_COLOR = BLACK_COLOR
 
 # Цвет границы ячейки
 BORDER_COLOR = (93, 216, 228)
@@ -54,13 +55,15 @@ class GameObject:
     draw - изображает предмет на экране.
     """
 
-    def __init__(self, position=BASIC_POSITION, body_color=BLACK_COLOR):
+    def __init__(self, position=BASIC_POSITION,
+                 body_color=BOARD_BACKGROUND_COLOR):
         self.position = position
         self.body_color = body_color
 
     def draw(self):
         """Абстрактный метод, который будет переопределен в подклассах."""
-        raise NotImplementedError
+        raise NotImplementedError("Не переопределен метод draw в классе "
+                                  "GameObject.")
 
     def draw_cell(self, position, body_color, border_color=BORDER_COLOR):
         """Отрисовывает ячейка на экран."""
@@ -84,12 +87,11 @@ class Apple(GameObject):
 
     def randomize_position(self, busy_cell=[BASIC_POSITION]):
         """Метод генерирующий случайную позицию для яблока"""
-        new_position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-                        randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-        while (new_position in busy_cell):
-            new_position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-                            randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-        self.position = new_position
+        self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                         randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
+        while (self.position in busy_cell):
+            self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                             randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
 
     def draw(self):
         """Метод изображающий яблоко на экране"""
@@ -146,7 +148,7 @@ class Snake(GameObject):
         """Метод возвращающий змейку в начальное состояние"""
         screen.fill(BOARD_BACKGROUND_COLOR)
         self.length = 1
-        self.positions = [BASIC_POSITION]
+        self.positions = [self.position]
         self.direction = RIGHT
 
 
@@ -155,7 +157,7 @@ def handle_keys(game_object):
     for event in pg.event.get():
         if event.type == pg.QUIT:
             pg.quit()
-            sys.exit(0)
+            sys.exit("Выход из игры.")
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_UP and game_object.direction != DOWN:
                 game_object.update_direction(UP)
@@ -167,7 +169,7 @@ def handle_keys(game_object):
                 game_object.update_direction(RIGHT)
             elif event.key == pg.K_ESCAPE:
                 pg.quit()
-                sys.exit(0)
+                sys.exit("Выход из игры.")
 
 
 def main():
@@ -181,13 +183,11 @@ def main():
         handle_keys(snake)
         snake.move()
 
-        if snake.get_head_position() in snake.positions[1:]:
+        if snake.get_head_position() in snake.positions[4:]:
             snake.reset()
-        else:
-
-            if snake.get_head_position() == apple.position:
-                snake.length += 1
-                apple.randomize_position(snake.positions)
+        elif snake.get_head_position() == apple.position:
+            snake.length += 1
+            apple.randomize_position(snake.positions)
         snake.draw()
         apple.draw()
 
